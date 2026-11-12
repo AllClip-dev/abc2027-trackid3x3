@@ -1,0 +1,51 @@
+You are shown {N} frames from a 3x3 basketball game (3 players per team, 6 on the court), in time
+order, sampled {INTERVAL} seconds apart. They come from one fixed camera standing beside an outdoor
+half-court, looking down at it obliquely, so the whole court is visible. The players are small (often
+only 40-70 pixels tall), so look closely.
+
+The six players on the court form two teams of three. The players of one team wear bibs of one colour,
+the players of the other team wear bibs of another colour, so you can tell the teams apart by the
+bibs. Call the two teams "T1" and "T2" (the labels are arbitrary: name whichever team you meet first
+"T1", and keep the same labels for the whole batch). The numbers printed on the bibs are
+  - one team: {NUMBERS_1}
+  - the other team: {NUMBERS_2}
+A number can appear in both teams (for example 6 or 9): then the bib colour tells you which team the
+player is in. Each player has exactly one number from his team's list.
+
+For every frame, detect a tight bounding box (head to feet) for every player who is ON THE COURT.
+There are at most 3 players per team, 6 in total. Ignore everyone else, even when they wear bibs:
+the substitutes and the scorekeeper standing or sitting beside the court (near the score board), any
+adult in a black shirt (coach, referee, helper), and people far from the court. A player who steps
+just over the court line still counts. Do not guess at a box for someone you cannot actually see.
+
+Not every frame shows all six players. A player can be hidden behind another player, cut off by the
+edge of the image, or briefly outside the camera view. Return a detection only for a player who is
+actually visible in that frame, so a frame can have fewer than 6 detections (5, 4 or even fewer; an
+empty list is fine). Never add or duplicate a box just to reach 6, and never give one person two boxes.
+
+Give each distinct player one "person_id" (an integer starting at 1) that stays the same for that
+player in every frame of this batch where they appear. Use the bib colour, the number, shorts, shoes,
+hair, height and position to decide who is who; players of the same team look alike, so follow each
+one from frame to frame by where they are and how they move, also through screens and when two
+players overlap. Two people visible in the same frame must never share a person_id. A batch has at
+most 6 person_ids.
+
+For each person give "team": "T1" or "T2".
+
+For every detection (one person in one frame) give "jersey": the bib number you can read on that
+player IN THAT FRAME, as a string (e.g. "6", "10"). It must be one of the numbers listed above, and
+it must be a number of that player's team. Read each frame on its own; do not copy a number from
+another frame. Use null if the number is not readable in that frame (facing away, turned sideways,
+blurred, occluded, too small). Do not guess.
+
+Return ONLY JSON, no prose, no markdown fences, in exactly this shape:
+{"people": [{"person_id": 1, "team": "T1"}, ...],
+ "frames": [{"frame": 0,
+             "detections": [{"person_id": 1, "jersey": "10", "bbox_1000": [x1, y1, x2, y2]},
+                            {"person_id": 2, "jersey": null, "bbox_1000": [x1, y1, x2, y2]}, ...]},
+            {"frame": 1, "detections": [...]}, ...]}
+
+bbox_1000 is [x1, y1, x2, y2] normalised to a 0-1000 grid regardless of the actual image size,
+top-left origin. "frame" is the 0-based index matching the order the {N} images were attached in
+(0 to {N_LAST}). Every one of the {N} frames must appear in "frames", even if its "detections" list
+is empty.

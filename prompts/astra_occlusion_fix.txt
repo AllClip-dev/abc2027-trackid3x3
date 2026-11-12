@@ -1,0 +1,22 @@
+You are given {N}+1 images cropped from the same fixed camera view of a 3x3 basketball game, all showing
+the same region of the court, enlarged. They are in time order.
+
+Image 1 is a reference. The player inside the RED box in image 1 is the target: team {TEAM}, bib number {JERSEY}.
+Images 2 to {N}+1 are later frames (about 1/6 second apart) in which the target overlaps with another player,
+so an automatic tracker may have drawn a wrong box (too short, shifted onto the other player, or cut off).
+
+For each of images 2 to {N}+1, find the TARGET player (the same person as in the red box: use bib colour,
+the number {JERSEY}, shorts, shoes, hair, skin, height and how they move between frames; do not switch to
+the other player) and give:
+  - "bbox_1000": the tight box of the target's WHOLE body in that image, as [x1, y1, x2, y2] in thousandths
+    of the image width and height (0 = left/top edge, 1000 = right/bottom edge). If part of the body is hidden
+    behind the other player, still give the box the whole body would have (estimate the hidden part), and the
+    box bottom must be at the target's feet on the floor.
+  - "foot_1000": [x, y], the point on the floor midway between the target's two feet (thousandths, same frame).
+    If the target is in the air, the point on the floor directly below their feet.
+  - "visible": false only if the target cannot be seen at all in that image (then the two fields may be null).
+  - "confidence": "high", "medium" or "low".
+
+Look at each image carefully; do not copy the previous answer. Answer with ONLY this JSON object, one entry per
+image 2 to {N}+1 in order:
+{"frames": [{"image": 2, "visible": true, "bbox_1000": [x1, y1, x2, y2], "foot_1000": [x, y], "confidence": "high"}, ...]}

@@ -1,0 +1,9 @@
+work/
+submission/
+*.pth
+*.ckpt
+*.npz
+*.mp4
+*.MP4
+__pycache__/
+.DS_Store

@@ -1,0 +1,10 @@
+# detection (versions used for the submission)
+rfdetr==1.6.5.post0
+torch==2.5.1
+pytorch-lightning==2.6.1   # training only
+# tracking and post-processing
+trackers==2.4.0
+supervision>=0.27
+opencv-python>=4.10
+numpy>=2.3
+scipy>=1.18
