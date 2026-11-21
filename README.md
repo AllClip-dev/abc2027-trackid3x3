@@ -34,7 +34,7 @@ The VLM steps need the Codex CLI, logged in to an account with GPT-6 Astra acces
 ## Reproducing the submission (per video `V`: IMG_0114, IMG_0115)
 
 ```bash
-D="path/to/TrackID3x3/Final challenge"; REG="$D/court_registration.csv"; mkdir -p work/$V
+D="path/to/TrackID3x3/Final challenge"; REG="$D/court_registration.csv"; COURT=path/to/Outdoor.png; mkdir -p work/$V
 # 1. detection + tracking (GPU)
 python scripts/ft_detect.py --video "$D/$V.MP4" --checkpoint trackid3x3_rfdetr_medium768_all8.pth \
   --resolution 768 --model medium --no-tta --out work/$V/det.npz
@@ -45,7 +45,7 @@ python scripts/extract_astra_frames.py --videos "$D/$V.MP4" --out-root work/vlm_
 TEAM_A_NAME=T1 TEAM_B_NAME=T2 bash scripts/resume_astra.sh work/vlm_$V prompts/rendered_nocolor/$V.txt unused unused
 # 3. identities -> tracks
 ARGS=(--video "$D/$V.MP4" --tracks work/$V/tracks.json --astra-results work/vlm_$V/results.jsonl
-      --clip $V --identity viterbi --court-registration "$REG" --cut-metric jump --ambig-margin 0.3 --ambig-mode foot --no-video)
+      --clip $V --identity viterbi --court-registration "$REG" --court-image "$COURT" --cut-metric jump --ambig-margin 0.3 --ambig-mode foot --no-video)
 python scripts/sync_and_render.py "${ARGS[@]}" --out-dir work/$V/base
 # 4. occlusion box re-drawing
 python scripts/occlusion_fix.py segments --trigger bottom --ident-boxes work/$V/base/ident_boxes.json \
@@ -57,6 +57,8 @@ python scripts/occlusion_fix.py boxes --root work/occl_$V --ident-boxes work/$V/
 python scripts/sync_and_render.py "${ARGS[@]}" --override-boxes work/$V/fix.json --out-dir work/$V/final
 python scripts/make_submission.py --pred work/$V/final/predictions.csv --video $V --out-dir submission
 ```
+
+`Outdoor.png` is the court image of the official TrackID3x3 tutorial; it is only drawn on (minimap), but step 3 reads it whenever `--court-registration` is given.
 
 Keep `work/` outside any directory that has an `AGENTS.md`, because Codex also reads that file. VLM answers can differ between runs. With our recorded answers, steps 3–5 reproduce the submitted files byte for byte.
 
